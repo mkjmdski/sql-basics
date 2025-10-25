@@ -1,6 +1,0 @@
-SELECT 
-C.CategoryName, P.UnitPrice * P.UnitsInStock AS SumValueProductsInStock
-FROM
-	Products P
-	JOIN Categories C
-		ON C.CategoryID = P.ProductID
