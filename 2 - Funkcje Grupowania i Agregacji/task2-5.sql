@@ -7,17 +7,24 @@ wyliczyć bazując na jego wartości, czyli sumie iloczynów cen jednostkowych o
 */
 
 
-SELECT 
-	C.CustomerID,
-	ROUND(AVG(OD.Quantity * OD.UnitPrice), 2) AS AveragePrice,
-	MIN(OD.Quantity * OD.UnitPrice) AS MinPrice,
-	MAX(OD.Quantity * OD.UnitPrice) AS MaxPrice
-FROM Orders O
-	JOIN [Order Details] OD
-		ON O.OrderID = OD.OrderID
-	JOIN Customers C
-		ON C.CustomerID = O.CustomerID
-GROUP BY
-	C.CustomerID
-ORDER BY
-	AveragePrice DESC
+WITH OrderTotals AS (
+  SELECT
+    O.OrderID,
+    O.CustomerID,
+    SUM(OD.Quantity * OD.UnitPrice) AS OrderTotal
+  FROM Orders O
+  JOIN [Order Details] OD 
+    ON O.OrderID = OD.OrderID
+  GROUP BY O.OrderID, O.CustomerID
+)
+ 
+SELECT
+  C.CustomerID,
+  ROUND(AVG(OT.OrderTotal), 2) AS AveragePrice,
+  ROUND(MIN(OT.OrderTotal), 2) AS MinPrice,
+  ROUND(MAX(OT.OrderTotal), 2) AS MaxPrice
+FROM OrderTotals OT
+JOIN Customers C 
+  ON C.CustomerID = OT.CustomerID
+GROUP BY C.CustomerID
+ORDER BY AveragePrice DESC;
